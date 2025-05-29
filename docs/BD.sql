@@ -1,6 +1,9 @@
+-- BD.sql
+-- This script creates a PostgreSQL database named 'rolverse' and a 'users' table.
 CREATE DATABASE rolverse;
 
-use rolverse;
+-- Asi es como se usa una base de datos en PostgreSQL , NO SE PUEDE USAR LA FRASE USE database
+-d rolverse;
 
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,

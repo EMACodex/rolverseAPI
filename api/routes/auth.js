@@ -46,14 +46,14 @@ router.post('/register', async (req, res) => {
 
 
     if (!name || !email || !password) {
-        return res.status(400).json({ code: 400, message: 'Name, email and password are required' });
+        return res.status(400).json({ code: 400, message: 'Todos los campos son obligatorios' });
     }
 
     try {
         // Verificar si el usuario ya existe
         const existingUser = await db.query('SELECT * FROM users WHERE email = $1', [email]);
         if (existingUser.rows.length > 0) {
-            return res.status(409).json({ code: 409, message: 'User already exists' });
+            return res.status(409).json({ code: 409, message: 'El usuario ya existe' });
         }
 
         // Hash de la contraseña
@@ -67,15 +67,62 @@ router.post('/register', async (req, res) => {
             to: email,
             subject: 'Bienvenido a Rolverse',
             text: `Hola ${name},\n\nGracias por registrarte en Rolverse. Estamos emocionados de tenerte con nosotros.\n\nSaludos,\nEl equipo de Rolverse`,
-            html: `<p>Hola ${name},</p><p>Gracias por registrarte en Rolverse. Estamos emocionados de tenerte con nosotros.</p><p>Saludos,<br>El equipo de Rolverse</p>`
         };
         await sendEmail(emailContent);
 
-        res.status(201).json({ code: 201, message: 'User registered successfully' });
+
+        res.status(201).json({ code: 201, message: 'Usuario registrado con éxito' });
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+// ENVIAR CORREO DE RECUPERACIÓN DE CONTRASEÑA
+router.post('/sendrecover', (req, res) => {
+    const { email } = req.body;
+    db.query('SELECT id FROM users WHERE email = $1', [email], (err, rows, fields) => {
+        if (!err) {
+            const idUsuario = rows[0];
+            console.log('idUsuario: ', idUsuario);
+            const token = jwt.sign({ idUsuario }, 'prueba', { expiresIn: '1h' });
+            const url = `http://localhost:4200/recover/${token}`;
+
+            const emailContent = {
+                to: email,
+                subject: 'Bienvenido a Rolverse',
+                text: `Buenas,\n\nPara recuperar tu contraseña, haz clic en el siguiente enlace:\n${url}.\n\nSi no has solicitado la recuperación de tu contraseña, ignora este mensaje.\n\nEl equipo de Rolverse`,
+            };
+
+            sendEmail(emailContent);
+            console.log('Correo enviado.');
+            res.json(rows.length > 0);
+        } else {
+            console.log(err);
+        }
+    });
+});
+
+// MODIFICAR CONTRASEÑA
+router.put('/recover', (req, res) => {
+    const { token, password } = req.body;
+    jwt.verify(token, 'prueba', (err, decoded) => {
+        if (err) {
+            res.status(400).json('Token inválido o expirado.');
+        } else {
+            bcrypt.hash(password, 10, (err, hash) => {
+                console.log('idUsuario: ', decoded);
+                db.query('UPDATE users SET password = $1 WHERE id = $2', [hash, decoded.idUsuario.id], (err, rows, fields) => {
+                    if (!err) {
+                        console.log('Contraseña modificada.');
+                        res.json('Contraseña modificada.');
+                    } else {
+                        console.log(err);
+                    }
+                });
+            });
+        }
+    });
 });
 
 module.exports = router;

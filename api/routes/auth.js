@@ -3,6 +3,7 @@ const router = express.Router();
 const db = require('../connection/connection');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
+const { sendEmail } = require('../nodemailer/nodemailer');
 
 // Ruta para loguearse
 router.post('/login', async (req, res) => {
@@ -30,6 +31,7 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign({ id: user.id }, 'prueba', { expiresIn: '1h' });
 
+        
         res.json({ code: 200, message: 'Login successful', token });
     } catch (error) {
         console.error(error);
@@ -59,6 +61,15 @@ router.post('/register', async (req, res) => {
 
         // Insertar el nuevo usuario
         await db.query('INSERT INTO users (name, email, password, creation_date) VALUES ($1, $2, $3, $4)', [name, email, hashedPassword, creation_date]);
+
+        // Enviar correo de bienvenida
+        const emailContent = {
+            to: email,
+            subject: 'Bienvenido a Rolverse',
+            text: `Hola ${name},\n\nGracias por registrarte en Rolverse. Estamos emocionados de tenerte con nosotros.\n\nSaludos,\nEl equipo de Rolverse`,
+            html: `<p>Hola ${name},</p><p>Gracias por registrarte en Rolverse. Estamos emocionados de tenerte con nosotros.</p><p>Saludos,<br>El equipo de Rolverse</p>`
+        };
+        await sendEmail(emailContent);
 
         res.status(201).json({ code: 201, message: 'User registered successfully' });
     } catch (error) {

@@ -81,11 +81,15 @@ router.post('/register', async (req, res) => {
 // ENVIAR CORREO DE RECUPERACIÓN DE CONTRASEÑA
 router.post('/sendrecover', (req, res) => {
     const { email } = req.body;
-    db.query('SELECT id FROM users WHERE email = $1', [email], (err, rows, fields) => {
+    db.query('SELECT id FROM users WHERE email = $1', [email], (err, result) => {
         if (!err) {
-            const idUsuario = rows[0];
-            console.log('idUsuario: ', idUsuario);
-            const token = jwt.sign({ idUsuario }, 'prueba', { expiresIn: '1h' });
+            const idUsuario = result.rows[0]?.id; // ✅ Extraes el ID correctamente
+
+            if (!idUsuario) {
+                return res.status(404).json({ error: 'Usuario no encontrado' });
+            }
+
+            const token = jwt.sign({ id: idUsuario }, 'prueba', { expiresIn: '1h' });
             const url = `http://localhost:4200/recover/${token}`;
 
             const emailContent = {
@@ -96,9 +100,10 @@ router.post('/sendrecover', (req, res) => {
 
             sendEmail(emailContent);
             console.log('Correo enviado.');
-            res.json(rows.length > 0);
+            res.json(true);
         } else {
-            console.log(err);
+            console.error(err);
+            res.status(500).json({ error: 'Error interno del servidor' });
         }
     });
 });
@@ -106,23 +111,35 @@ router.post('/sendrecover', (req, res) => {
 // MODIFICAR CONTRASEÑA
 router.put('/recover', (req, res) => {
     const { token, password } = req.body;
+
     jwt.verify(token, 'prueba', (err, decoded) => {
         if (err) {
-            res.status(400).json('Token inválido o expirado.');
-        } else {
-            bcrypt.hash(password, 10, (err, hash) => {
-                console.log('idUsuario: ', decoded);
-                db.query('UPDATE users SET password = $1 WHERE id = $2', [hash, decoded.idUsuario.id], (err, rows, fields) => {
+            return res.status(400).json('Token inválido o expirado.');
+        }
+
+        bcrypt.hash(password, 10, (err, hash) => {
+            if (err) {
+                return res.status(500).json('Error al encriptar la contraseña.');
+            }
+
+            console.log('idUsuario decodificado: ', decoded);
+
+            db.query(
+                'UPDATE users SET password = $1 WHERE id = $2',
+                [hash, decoded.id],
+                (err, result) => {
                     if (!err) {
                         console.log('Contraseña modificada.');
                         res.json('Contraseña modificada.');
                     } else {
-                        console.log(err);
+                        console.error('Error al actualizar la contraseña:', err);
+                        res.status(500).json('Error al actualizar la contraseña.');
                     }
-                });
-            });
-        }
+                }
+            );
+        });
     });
 });
+
 
 module.exports = router;

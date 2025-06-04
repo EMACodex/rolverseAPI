@@ -122,8 +122,6 @@ router.put('/recover', (req, res) => {
                 return res.status(500).json('Error al encriptar la contraseña.');
             }
 
-            console.log('idUsuario decodificado: ', decoded);
-
             db.query(
                 'UPDATE users SET password = $1 WHERE id = $2',
                 [hash, decoded.id],

@@ -75,7 +75,6 @@ CREATE TABLE forums (
   id SERIAL PRIMARY KEY,
   title VARCHAR(255) NOT NULL,
   description TEXT,
-  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL
 );
 
 -- Tabla messages
@@ -83,6 +82,23 @@ CREATE TABLE messages (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
   forum_id INTEGER REFERENCES forums(id) ON DELETE CASCADE,
+  text TEXT NOT NULL,
+  image_path TEXT,
+  creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla Partidas
+CREATE TABLE matches (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  description TEXT,
+);
+
+-- Tabla messages
+CREATE TABLE plays (
+  id SERIAL PRIMARY KEY,
+  user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+  match_id INTEGER REFERENCES matches(id) ON DELETE CASCADE,
   text TEXT NOT NULL,
   image_path TEXT,
   creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP

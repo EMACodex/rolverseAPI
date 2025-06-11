@@ -9,7 +9,6 @@ const { sendEmail } = require('../nodemailer/nodemailer');
 router.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
-
     if (!email || !password) {
         return res.status(400).json({ code: 400, message: 'Email and password are required' });
     }
@@ -29,8 +28,15 @@ router.post('/login', async (req, res) => {
             return res.status(401).json({ code: 401, message: 'Invalid email or password' });
         }
 
-        const token = jwt.sign({ id: user.id }, 'prueba', { expiresIn: '1h' });
+        // obtenemos el rol del usuario
+        const roleResult = await db.query(
+        'SELECT name FROM roles r JOIN user_roles ur ON ur.role_id = r.id WHERE ur.user_id = $1',
+        [user.id]
+        );
 
+        const role = roleResult.rows[0]?.name; // accedemos al nombre del rol directamente
+
+        const token = jwt.sign({ id: user.id, role: role }, 'prueba', { expiresIn: '1h' });
         
         res.json({ code: 200, message: 'Login successful', token });
     } catch (error) {
@@ -62,6 +68,12 @@ router.post('/register', async (req, res) => {
         // Insertar el nuevo usuario
         await db.query('INSERT INTO users (name, email, password, creation_date) VALUES ($1, $2, $3, $4)', [name, email, hashedPassword, creation_date]);
 
+        // Asignar el rol de usuario por defecto (id = 2)
+        const userResult = await db.query('SELECT id FROM users WHERE email = $1', [email]);
+        const userId = userResult.rows[0].id;
+        const roleId = await db.query('SELECT id FROM roles WHERE name = $1', ['user']);
+        await db.query('INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2)', [userId, roleId.rows[0].id]);
+
         // Enviar correo de bienvenida
         const emailContent = {
             to: email,
@@ -90,7 +102,7 @@ router.post('/sendrecover', (req, res) => {
             }
 
             const token = jwt.sign({ id: idUsuario }, 'prueba', { expiresIn: '1h' });
-            const url = `http://localhost:4200/recover/${token}`;
+            const url = `http://localhost:4200/session/recover/${token}`;
 
             const emailContent = {
                 to: email,

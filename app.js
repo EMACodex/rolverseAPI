@@ -14,6 +14,7 @@ const testRoute = require('./api/routes/testRoute');
 const authRoute = require('./api/routes/auth');
 const userRoute = require('./api/routes/user');
 const newsRoutes = require('./api/routes/news');
+const forumRoute = require('./api/routes/forum');
 
 // Configura las rutas
 app.use('/api/test', testRoute);
@@ -21,6 +22,6 @@ app.use('/auth', authRoute);
 app.use('/user', userRoute);
 app.use('/news', newsRoutes);
 app.use('/uploads', express.static('uploads'));
-
+app.use('/forum', forumRoute);
 
 module.exports = app;

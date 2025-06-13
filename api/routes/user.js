@@ -19,7 +19,7 @@ router.get('/all', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const userId = req.params.id;
 
-    db.query('SELECT name, email, message_count FROM users WHERE id = $1', [userId], (err, result) => {
+    db.query('SELECT name, email FROM users WHERE id = $1', [userId], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: 'Error obteniendo el usuario.' });

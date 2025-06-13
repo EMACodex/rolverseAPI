@@ -1,9 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../connection/connection');
-const bcrypt = require('bcrypt');
-const jwt = require('jsonwebtoken');
-const { sendEmail } = require('../nodemailer/nodemailer');
 
 router.get('/all', async (req, res) => {
     
@@ -20,7 +17,7 @@ router.get('/all', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const forum_id = req.params.id;
 
-    db.query('SELECT name, email, message_count FROM forums WHERE id = $1', [forum_id], (err, result) => {
+    db.query('SELECT title, description FROM forums WHERE id = $1', [forum_id], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: 'Error obteniendo el foro.' });

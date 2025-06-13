@@ -15,6 +15,7 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL,
   message_count INTEGER DEFAULT 0,
   points INTEGER DEFAULT 0,
+  rank_id INTEGER REFERENCES ranges(id) ON DELETE SET NULL,
   creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 

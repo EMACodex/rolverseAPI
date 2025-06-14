@@ -47,6 +47,26 @@ router.get('/all/:forum_id', async (req, res) => {
   }
 });
 
+router.get('/last/:user_id', async (req, res) => {
+  const user_id = req.params.user_id;
+
+  try {
+    const result = await db.query(
+      `SELECT m.*, u.name AS user_name 
+       FROM messages m 
+       JOIN users u ON m.user_id = u.id 
+       WHERE m.user_id = $1 
+       ORDER BY m.creation_date DESC 
+       LIMIT 5`, 
+      [user_id]
+    );
+    res.status(200).json({ message: 'Últimos mensajes obtenidos exitosamente.', data: result.rows });
+  } catch (error) {
+    console.error('Error obteniendo los últimos mensajes:', error);
+    res.status(500).json({ message: 'Error obteniendo los últimos mensajes.' });
+  }
+});
+
 // ✅ POST crear mensaje (con imagen opcional)
 router.post('/new', upload.single('image'), async (req, res) => {
   const { forum_id, text, user_id } = req.body;

@@ -19,7 +19,7 @@ router.get('/all', async (req, res) => {
 router.get('/:id', async (req, res) => {
     const userId = req.params.id;
 
-    db.query('SELECT name, email FROM users WHERE id = $1', [userId], (err, result) => {
+    db.query('SELECT u.name, u.email, u.message_count, u.points, r.name AS rank_name, r.image_name AS rank_image, u.creation_date FROM users u JOIN ranges r ON u.rank_id = r.id WHERE u.id = $1', [userId], (err, result) => {
         if (err) {
             console.error(err);
             return res.status(500).json({ message: 'Error obteniendo el usuario.' });
@@ -27,6 +27,7 @@ router.get('/:id', async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
+        console.log('Usuario obtenido:', result.rows[0]);
         res.status(200).json({ message: 'Usuario obtenido exitosamente.', data: result.rows[0] });
     });
 

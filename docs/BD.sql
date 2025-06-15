@@ -15,6 +15,7 @@ CREATE TABLE users (
   password VARCHAR(255) NOT NULL,
   message_count INTEGER DEFAULT 0,
   points INTEGER DEFAULT 0,
+  rank_id INTEGER REFERENCES ranges(id) ON DELETE SET NULL,
   creation_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -23,8 +24,31 @@ CREATE TABLE ranges (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   points_required INTEGER NOT NULL,
-  description TEXT
+  description TEXT,
+  image_name VARCHAR(255) NOT NULL
 );
+-- Insertar rangos en la tabla 'ranges'
+
+INSERT INTO ranges (name, points_required, description, image_name)
+VALUES
+  ('Hobbit', 0, 'El nivel inicial. Estás comenzando a explorar y participar en la comunidad.', 'level_1.png'),
+  ('Aldeano (Humano común)', 100, 'Has dado el siguiente paso. Ahora conoces la comunidad y haces tus primeras contribuciones.', 'level_2.png'),
+  ('Mago', 250, 'No solo participas, sino que creas contenido valioso y contribuyes de forma significativa.', 'level_3.png'),
+  ('Dragón', 500, 'Estás explorando nuevas herramientas y funciones avanzadas, llevando la experiencia a otro nivel.', 'level_4.png'),
+  ('Guerrero/Guerrera (Humano tipo montaraz)', 750, 'Defiendes y moderas la comunidad, ayudando a mantenerla activa y organizada.', 'level_5.png');
+
+-- INSERT INTO ranges (name, points_required, description)
+-- VALUES
+--   ('Hobbit', 0, 'El nivel inicial. Estás comenzando a explorar y participar en la comunidad.'),
+--   ('Aldeano (Humano común)', 50, 'Has dado el siguiente paso. Ahora conoces la comunidad y haces tus primeras contribuciones.'),
+--   ('Guardabosques', 100, 'Ya eres un usuario activo. Aportes regulares y bien conocidos en la comunidad.'),
+--   ('Enano', 250, 'No solo participas, sino que creas contenido valioso y contribuyes de forma significativa.'),
+--   ('Elfo', 500, 'Eres un experto en la comunidad. Aportes frecuentes, elaborados y siempre bien recibidos.'),
+--   ('Guerrero/Guerrera (Humano tipo montaraz)', 750, 'Defiendes y moderas la comunidad, ayudando a mantenerla activa y organizada.'),
+--   ('Hechicero Aprendiz', 1000, 'Estás explorando nuevas herramientas y funciones avanzadas, llevando la experiencia a otro nivel.'),
+--   ('Mago Consagrado', 1500, 'Dominas todos los aspectos de la aplicación. Comparte trucos y consejos con la comunidad.'),
+--   ('Archimago', 2000, 'Tu autoridad en la comunidad es indiscutible. Llevas mucho tiempo aportando y ayudando a otros.'),
+--   ('Vanyar (Elfos de Valinor)', 5000, 'Eres un usuario legendario. Tus aportes han dejado una huella imborrable en la comunidad.');
 
 -- Tabla roles
 CREATE TABLE roles (
@@ -32,21 +56,6 @@ CREATE TABLE roles (
   name VARCHAR(50) UNIQUE NOT NULL,
   description TEXT
 );
-
--- Insertar rangos en la tabla 'ranges'
-
-INSERT INTO ranges (name, points_required, description)
-VALUES
-  ('Hobbit', 0, 'El nivel inicial. Estás comenzando a explorar y participar en la comunidad.'),
-  ('Aldeano (Humano común)', 50, 'Has dado el siguiente paso. Ahora conoces la comunidad y haces tus primeras contribuciones.'),
-  ('Guardabosques', 100, 'Ya eres un usuario activo. Aportes regulares y bien conocidos en la comunidad.'),
-  ('Enano', 250, 'No solo participas, sino que creas contenido valioso y contribuyes de forma significativa.'),
-  ('Elfo', 500, 'Eres un experto en la comunidad. Aportes frecuentes, elaborados y siempre bien recibidos.'),
-  ('Guerrero/Guerrera (Humano tipo montaraz)', 750, 'Defiendes y moderas la comunidad, ayudando a mantenerla activa y organizada.'),
-  ('Hechicero Aprendiz', 1000, 'Estás explorando nuevas herramientas y funciones avanzadas, llevando la experiencia a otro nivel.'),
-  ('Mago Consagrado', 1500, 'Dominas todos los aspectos de la aplicación. Comparte trucos y consejos con la comunidad.'),
-  ('Archimago', 2000, 'Tu autoridad en la comunidad es indiscutible. Llevas mucho tiempo aportando y ayudando a otros.'),
-  ('Vanyar (Elfos de Valinor)', 5000, 'Eres un usuario legendario. Tus aportes han dejado una huella imborrable en la comunidad.');
 
 
 -- Tabla user_roles
@@ -186,3 +195,4 @@ CREATE TRIGGER trg_update_message_and_points_after_delete
 AFTER DELETE ON messages
 FOR EACH ROW
 EXECUTE FUNCTION update_message_and_points_on_delete();
+

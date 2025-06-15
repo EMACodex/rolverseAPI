@@ -103,7 +103,7 @@ CREATE TABLE matches (
   description TEXT,
 );
 
--- Tabla messages
+-- Tabla jugadas o mensajes dentro de partidas
 CREATE TABLE plays (
   id SERIAL PRIMARY KEY,
   user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
@@ -118,6 +118,26 @@ CREATE TABLE worlds (
   id SERIAL PRIMARY KEY,
   name VARCHAR(100) NOT NULL,
   description TEXT
+);
+
+-- Tabla noticias
+CREATE TABLE news (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(255) NOT NULL,
+  summary TEXT, -- reseña opcional
+  content TEXT NOT NULL, -- descripción con texto e imágenes (guardado como HTML si quieres)
+  author_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  image_path TEXT, -- opcional
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabla comentarios de noticias
+CREATE TABLE news_comments (
+  id SERIAL PRIMARY KEY,
+  news_id INTEGER REFERENCES news(id) ON DELETE CASCADE,
+  user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+  comment TEXT NOT NULL,
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Función para actualizar el contador de mensajes y los puntos del usuario

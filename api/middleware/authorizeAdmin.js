@@ -1,11 +1,21 @@
 function authorizeAdmin(req, res, next) {
-  const roles = req.user?.roles;
+  // Construimos un array de roles a partir de roles[] o de role singular
+  let rolesArray = [];
 
-  if (!roles || !roles.includes('admin')) {
-    return res.status(403).json({ error: 'Acceso denegado: se requiere rol de administrador' });
+  if (Array.isArray(req.user?.roles)) {
+    rolesArray = req.user.roles;
+  } else if (typeof req.user?.role === 'string') {
+    rolesArray = [req.user.role];
   }
 
-  next(); // continúa si el usuario es admin
+  if (!rolesArray.includes('admin')) {
+    return res
+      .status(403)
+      .json({ error: 'Acceso denegado: se requiere rol de administrador' });
+  }
+
+  next();
 }
 
 module.exports = authorizeAdmin;
+

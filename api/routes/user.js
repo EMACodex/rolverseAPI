@@ -27,7 +27,6 @@ router.get('/:id', async (req, res) => {
         if (result.rows.length === 0) {
             return res.status(404).json({ message: 'Usuario no encontrado.' });
         }
-        console.log('Usuario obtenido:', result.rows[0]);
         res.status(200).json({ message: 'Usuario obtenido exitosamente.', data: result.rows[0] });
     });
 

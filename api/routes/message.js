@@ -71,7 +71,6 @@ router.get('/last/:user_id', async (req, res) => {
 router.post('/new', upload.single('image'), async (req, res) => {
   const { forum_id, text, user_id } = req.body;
 
-  console.log('Datos recibidos:', { forum_id, text, user_id });
 
   if (!forum_id || !text) {
     return res.status(400).json({ message: 'Texto y foro son obligatorios.' });
